@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="app">
+        <div @click="count++">{{ count }}</div>
+        <div v-html="html"></div>
+        <input v-bind:placeholder="placeholder" :disabled="truthy" />
+        <input :placeholder="placeholder" :disabled="falsy" />
+        <input :placeholder="placeholder" :disabled="weird" />
+        <input v-bind="complex" />
+        <div>{{(()=>{return "I'm an IIFe!".replace(/e/, (x)=>x.toUpperCase());})()}}</div>
+        <div>{{func()}}</div>
+        <div>The square root of 2 is {{Math.sqrt(2)}}</div>
+        <div>{{customGlobal}}</div>
+        <div @click="(toggly = !toggly)">Toggle me {{ toggly }}</div>
+        <div v-on:click="toggly = !toggly">Non-shorthand toggly</div>
+        <div v-if="toggly">I'm conditionally rendered</div>
+        <div @click="whichevent=whichevent==='keydown'?'keyup':'keydown'">Which event to trigger on?</div>
+        <div>
+            This input updates on {{whichevent}}
+            <input @[whichevent]="rand = Math.random()" />
+            <input v-on:[whichevent]="rand = Math.random()" />
+            <input v-on:[useless]="rand = Math.random()" placeholder="This one is useless" />
+            <input v-on:[whichevent].prevent="rand = Math.random()" placeholder="This one uses a modifier" />
+            <div>{{rand}}</rand>
+        <div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
