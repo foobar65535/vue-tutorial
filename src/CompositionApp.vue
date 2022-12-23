@@ -6,6 +6,7 @@ import DivWithClasses from './DivWithClasses.vue';
 import MultiDivWithClasses from './MultiDivWithClasses.vue';
 import ConditionalDiv from './ConditionalDiv.vue';
 import RandomDiv from './RandomDiv.vue';
+import LifecycleBoxComposition from './LifecycleBoxComposition.vue';
 
 const mutable = reactive({count: 0});
 const getMutable = () => {
@@ -86,7 +87,13 @@ const rotateKeyed = () => {
 };
 
 const detectArr: Ref<number[]> = ref([]);
-const detectArrEven = computed(() => detectArr.value.filter(x=>x%2===0).reverse());
+const detectArrEven = computed(() => detectArr.value.filter(x => x % 2 === 0).reverse());
+
+const lifecycleBoxProp = ref('initial');
+const updateProp = () => {
+  lifecycleBoxProp.value = Math.random().toString(32);
+};
+const showLifecycleBox = ref(true);
 </script>
 
 <template>
@@ -102,7 +109,7 @@ const detectArrEven = computed(() => detectArr.value.filter(x=>x%2===0).reverse(
     </div>
     <p>v-if is evaluated before v-for</p>
     <ul>
-      <li v-for="item in arr" v-if="isEven[0]==='y'">{{ item}}</li>
+      <li v-for="item in arr" v-if="isEven[0] === 'y'">{{ item}}</li>
     </ul>
     <button @click="computedObj = {foo: Math.floor(Math.random() * 100) - 500}">Mutate computed object</button>
     <div @click="twoWay.inner.value = Math.random()">Two way computed property {{ twoWay.inner}}</div>
@@ -157,32 +164,32 @@ const detectArrEven = computed(() => detectArr.value.filter(x=>x%2===0).reverse(
 
     <ConditionalDiv :conditional="isEven === 'yes'" />
     <ol>
-      <li v-for="({foo}, i) in arrOfObj">{{foo}}: <em>{{i}}</em></li>
-      <li v-for="({foo}, i) of arrOfObj">{{foo}}: <em>{{i}}</em> with alternate syntax</li>
+      <li v-for="({foo}, i) in arrOfObj">{{ foo}}: <em>{{ i}}</em></li>
+      <li v-for="({foo}, i) of arrOfObj">{{ foo}}: <em>{{ i}}</em> with alternate syntax</li>
     </ol>
     <p>
       Sadly complicated destructuring &lt;li v-for="({foo: bar}, i) in arrOfObj"&gt; is not supported.
     </p>
     <p>Object iteration</p>
     <ul>
-      <li v-for="value in obj">Attempt A {{value}}</li>
+      <li v-for="value in obj">Attempt A {{ value}}</li>
     </ul>
     <ul>
-      <li v-for="(value) in obj">Attempt B {{value}}</li>
+      <li v-for="(value) in obj">Attempt B {{ value}}</li>
     </ul>
     <ul>
-      <li v-for="(value, key) in obj">Attempt C {{value}} and {{key}}</li>
+      <li v-for="(value, key) in obj">Attempt C {{ value}} and {{ key}}</li>
     </ul>
     <ul>
-      <li v-for="(value, key, index) in obj">Attempt D {{value}} and {{key}} with index {{index}}</li>
+      <li v-for="(value, key, index) in obj">Attempt D {{ value}} and {{ key}} with index {{ index}}</li>
     </ul>
     <ul>
-      <li v-for="i in 4">Attempt Z {{i}} WHY 1-based</li>
+      <li v-for="i in 4">Attempt Z {{ i}} WHY 1-based</li>
     </ul>
     <ol>
       <template v-for="i in 3">
-        <li>Template item A {{i}}</li>
-        <li v-if="i % 2 === 1">Template item B odd only {{i}}</li>
+        <li>Template item A {{ i}}</li>
+        <li v-if="i % 2 === 1">Template item B odd only {{ i}}</li>
       </template>
     </ol>
     <hr />
@@ -192,21 +199,25 @@ const detectArrEven = computed(() => detectArr.value.filter(x=>x%2===0).reverse(
     <button @click="rotateKeyed">Rotate</button>
     <hr />
 
-    <button @click="detectArr.push(Math.floor(Math.random()*100)+100)">Push</button>
+    <button @click="detectArr.push(Math.floor(Math.random() * 100) + 100)">Push</button>
     <button @click="detectArr.pop()">Pop</button>
-    <button @click="detectArr.unshift(-Math.floor(Math.random()*100)-100)">Unshift</button>
+    <button @click="detectArr.unshift(-Math.floor(Math.random() * 100) - 100)">Unshift</button>
     <button @click="detectArr.shift()">Shift</button>
     <button @click="detectArr.splice(2, 1)">Remove third element</button>
     <button @click="detectArr.sort()">Sort</button>
     <button @click="detectArr.reverse()">Reverse</button>
-    <button @click="detectArr=detectArr.map(x=>x+1)">Non mutating increment all</button>
+    <button @click="detectArr = detectArr.map(x => x + 1)">Non mutating increment all</button>
     <ul>
-      <li v-for="val in detectArr">{{val}}</li>
+      <li v-for="val in detectArr">{{ val}}</li>
     </ul>
     <p>Even members only and reversed</p>
     <ul>
-      <li v-for="val in detectArrEven">{{val}}</li>
+      <li v-for="val in detectArrEven">{{ val}}</li>
     </ul>
+    <hr />
+    <LifecycleBoxComposition v-if="showLifecycleBox" :someprop="lifecycleBoxProp" />
+    <button @click="updateProp">Update lifecycle box prop</button>
+    <button @click="showLifecycleBox = !showLifecycleBox">Show/hide lifecycle box</button>
   </div>
 </template>
 

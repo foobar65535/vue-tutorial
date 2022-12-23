@@ -1,5 +1,9 @@
 <script lang="ts">
+import LifecycleBoxOptions from './LifecycleBoxOptions.vue';
 export default {
+  components: {
+    LifecycleBoxOptions,
+  },
   data() {
     return {
       count: 0,
@@ -17,6 +21,8 @@ export default {
       dynamic: "Dynamic",
       obj: {},
       arr: [1, 2, 3],
+      lifecycleBoxProp: "initial",
+      showLifecycleBox: true,
     };
   },
   computed: {
@@ -57,6 +63,9 @@ export default {
     },
     arrayReverse() {
       this.arr.reverse();
+    },
+    updateProp() {
+      this.lifecycleBoxProp = Math.random().toString(32);
     },
   },
   watch: {
@@ -120,6 +129,11 @@ export default {
     </div>
     <hr />
     <div>{{ dynamic}}</div>
+    <hr />
+    <p>Lifecycle hook demo</p>
+    <LifecycleBoxOptions v-if="showLifecycleBox" :someprop="lifecycleBoxProp" />
+    <button @click="updateProp">Update lifecycle box prop</button>
+    <button @click="showLifecycleBox=!showLifecycleBox">Show/hide lifecycle box</button>
   </div>
 </template>
 
