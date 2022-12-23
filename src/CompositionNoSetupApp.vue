@@ -1,12 +1,23 @@
 <script lang="ts">
-import {reactive, computed, ref} from 'vue';
+import {reactive, computed, ref, nextTick} from 'vue';
+
+import CustomInput from './CustomInput.vue';
+
 export default {
+  components: {
+    CustomInput,
+  },
   setup() {
     const mutable = reactive({count: 0});
     const doesNotDependOnSetup = computed(() => mutable.count ** 2);
     const tagName = ref('<none>');
     const clickMsg = ref('<initial>');
     const keyText = ref('<initial>');
+
+    const manuallyBoundInput = ref('This is a manually bound input');
+    const autoBoundInput = ref('This is a automatically bound input');
+    const autoBoundCheckbox = ref(false);
+
     const nested = {
       a: {
         b: {
@@ -24,6 +35,29 @@ export default {
       }
       console.log("Huge amounts of lag", str.slice(3333332, 3333334));
     };
+    const selectComputedInner = ref([]);
+    const selectComputed = computed<string[]>({
+      get() {
+        return selectComputedInner.value;
+      },
+      set(val) {
+        selectComputedInner.value = [];
+      },
+    });
+    const weirdCheck = ref('default');
+    const weirdCheckTrue = ref(weirdCheck.value);
+    const weirdCheckFalse = ref('other');
+    const toggleWeirdCheck = () => {
+      const trueValue = Math.random().toString(36);
+      const falseValue = Math.random().toString(36).toUpperCase();
+      const nextValue = weirdCheck.value === weirdCheckTrue.value ? falseValue : trueValue;
+      weirdCheckTrue.value = trueValue;
+      weirdCheckFalse.value = falseValue;
+      // You need this nextTick for this to work
+      nextTick(() => {
+        weirdCheck.value = nextValue;
+      });
+    };
     return {
       mutable,
       doesNotDependOnSetup,
@@ -32,12 +66,40 @@ export default {
       clickMsg,
       causeLag,
       keyText,
+      manuallyBoundInput,
+      autoBoundInput,
+      autoBoundCheckbox,
+      selectArr: ref([]),
+      selectSet: ref(new Set()),
+      radio: ref('alpha'),
+      select: ref('Hydrogen'),
+      listOfItems: ['Hydrogen', 'Lithium', 'Sodium', 'Potassium'],
+      checkedArr: ref([]),
+      checkedSet: ref(new Set()),
+      radioOther: ref('other'),
+      selectComputedInner,
+      selectComputed,
+      stringCheck: ref('default'),
+      weirdCheck,
+      weirdCheckTrue,
+      weirdCheckFalse,
+      toggleWeirdCheck,
+      customInput: ref('this is a custom input'),
+      weirdRadio: ref('<default>'),
+      weirdRadioChoices: reactive(['first', 'second', 'third']),
+      selectObj: ref({'default': 'yes'}),
+      lazyText: ref('i am lazy'),
+      numberInput: ref(33333),
+      trimmedInput: ref('     i start out not trimmed         '),
       addOutside(ev: MouseEvent) {
         console.log("Add outside event", ev);
         mutable.count += 3;
       },
       addOutsideN(n: number) {
         mutable.count += n;
+      },
+      logSelectChange(ev: any) {
+        console.log("Select change", ev);
       },
     };
   }
@@ -144,6 +206,152 @@ export default {
     <button @click.left="keyText = 'click.left' + Date.now()" @click.middle="keyText = 'click.middle' + Date.now()"
       @click.right.prevent="keyText = 'click.right' + Date.now()">Left/Middle/Right-click this button</button>
     <button @click.middle.ctrl="keyText = 'click.middle.ctrl' + Date.now()">Ctrl-middle-click this button</button>
+    <hr />
+
+    <div>The value of the below input is manually bound: {{ manuallyBoundInput}}</div>
+    <input :value="manuallyBoundInput" @input="manuallyBoundInput = $event.target.value" /> is equal to
+    <input :value="manuallyBoundInput" @input="manuallyBoundInput = $event.target.value" />
+    <div>The value of the below input is bound using v-model (using value property and input event): {{ autoBoundInput}}
+    </div>
+    <div>Magically the bound value is not updated during IME composition. How?</div>
+    <input v-model="autoBoundInput" /> is equal to
+    <input v-model="autoBoundInput" />
+    <textarea v-model="autoBoundInput"></textarea>
+    <div>The value of the below input is bound using v-model (using checked property and change event): {{
+        autoBoundCheckbox
+    }}</div>
+    <input type="checkbox" v-model="autoBoundCheckbox" /> is equal to
+    <input type="checkbox" v-model="autoBoundCheckbox" />
+    <div>Radio button state: {{ radio}}</div>
+    <form>
+      Foo <input type="radio" name="foo" value="alpha" v-model="radio" /> and Bar
+      <input type="radio" name="foo" value="beta" v-model="radio" />
+    </form>
+    <div>Dropdown state: {{ select}}</div>
+    <select v-model="select">
+      <option v-for="item in listOfItems" :value="item">{{ item}}</option>
+    </select>
+    <div>Every other item is disabled</div>
+    <select v-model="select">
+      <option value="" disabled>Dummy</option>
+      <option v-for="(item, i) in listOfItems" :value="item" :disabled="i % 2 === 0">{{ item}}</option>
+    </select>
+    <p>These checkboxes are an array</p>
+    <div>
+      <span v-for="item in listOfItems">
+        <input type="checkbox" :value="item" v-model="checkedArr" />
+        {{ item}}
+      </span>
+    </div>
+    and
+    <div>
+      <span v-for="item in listOfItems">
+        <input type="checkbox" :value="item" v-model="checkedArr" />
+        {{ item}}
+      </span>
+    </div>
+    <hr />
+    <p>These checkboxes are a set</p>
+    <div>
+      <span v-for="item in listOfItems">
+        <input type="checkbox" :value="item" v-model="checkedSet" />
+        {{ item}}
+      </span>
+    </div>
+    and
+    <div>
+      <span v-for="item in listOfItems">
+        <input type="checkbox" :value="item" v-model="checkedSet" />
+        {{ item}}
+      </span>
+    </div>
+    <hr />
+    <p>Chosen radio button is {{ radioOther}}</p>
+    <div>
+      <span v-for="item in listOfItems">
+        <input type="radio" :value="item" v-model="radioOther" />
+        {{ item}}
+      </span>
+    </div>
+    and
+    <div>
+      <span v-for="item in listOfItems">
+        <input type="radio" :value="item" v-model="radioOther" />
+        {{ item}}
+      </span>
+    </div>
+    <hr />
+    <div>What you can directly serialize an array?: {{ listOfItems}}</div>
+    <p>Multiple select</p>
+    <div>
+      array
+      <select class="ib" v-model="selectArr" multiple>
+        <option v-for="(item, i) in listOfItems" :value="item">{{ item}}</option>
+      </select>
+      <select class="ib" v-model="selectArr" multiple>
+        <option v-for="(item, i) in listOfItems" :value="item" :disabled="i % 2 === 0">{{ item}}</option>
+      </select>
+      and set
+      <select class="ib" v-model="selectSet" multiple>
+        <option v-for="(item, i) in listOfItems" :value="item">{{ item}}</option>
+      </select>
+      <select class="ib" v-model="selectSet" multiple>
+        <option v-for="(item, i) in listOfItems" :value="item" :disabled="i % 2 === 0">{{ item}}</option>
+      </select>
+      and weird
+      <select class="ib" v-model="selectComputedInner" multiple>
+        <option v-for="(item, i) in listOfItems" :value="item">{{ item}}</option>
+      </select>
+      <select class="ib" v-model="selectComputed" multiple>
+        <option v-for="(item, i) in listOfItems" :value="item" :disabled="i % 2 === 0">{{ item}}</option>
+      </select>
+    </div>
+    <hr />
+    <p>Checkbox value is {{ stringCheck}}</p>
+    <input type="checkbox" v-model="stringCheck" true-value="checked" false-value="not checked" />
+    <button @click="stringCheck = stringCheck === 'checked' ? 'not checked' : 'checked'">Externally toggle
+      checkbox</button>
+    <p>Weird checkbox value is {{ weirdCheck}} (true is {{ weirdCheckTrue}}, false is {{ weirdCheckFalse}})</p>
+    <input type="checkbox" v-model="weirdCheck" :true-value="weirdCheckTrue" :false-value="weirdCheckFalse" />
+    <button @click="toggleWeirdCheck">Externally toggle weird checkbox</button>
+    <p>Weird radio choice is {{weirdRadio}} with choices {{weirdRadioChoices}} (without name attribute)</p>
+    <template v-for="c in weirdRadioChoices">
+      <input type="radio" :value="c" v-model="weirdRadio" /> is {{c}};
+    </template>
+    <p>Weird radio choice with name attribute</p>
+    <template v-for="c in weirdRadioChoices">
+      <input type="radio" :value="c" v-model="weirdRadio" name="weirdRadioNamedFoo" /> is {{c}};
+    </template>
+    <button @click="weirdRadioChoices.unshift(weirdRadioChoices.pop()!)">Rotate</button>
+    <p>Wow typescript is compiled even in templates?</p>
+    <p>Weird radio choice keyed and with name attribute</p>
+    <template v-for="c in weirdRadioChoices" :key="c">
+      <input type="radio" :value="c" v-model="weirdRadio" name="weirdRadioNamedBar" /> is {{c}};
+    </template>
+    <p>Select with object values {{selectObj}}</p>
+    <select v-model="selectObj">
+      <option v-for="i in 4" :value="{[Math.cos(i)]: Math.tan(i).toString(32)}">{{i}}</option>
+    </select>
+    <p>This select contains cyclic object values; rendering the value throws an error and destroys this component</p>
+    <select v-model="selectObj">
+      <option v-for="i in 4" :value="((a)=>(a.a=a,a))({})">{{i}}</option>
+    </select>
+    <p>This textbox is lazy and is updated on "change", not "input": {{lazyText}}</p>
+    <input v-model.lazy="lazyText" />
+    <p>This textbox takes numbers: {{numberInput}}, let's see typeof: {{typeof numberInput}}, it gives up if parseFloat can't handle the number (and you can't explicitly make it result in nan?).</p>
+    <input v-model.number="numberInput" />
+    <p>This textbox is lazy and numeric and tied with the previous one</p>
+    <input v-model.number.lazy="numberInput" />
+    <p>This textbox is implicitly numeric (note that the value property on the dom object is still a string, but it's an empty string if the input isn't a valid number)</p>
+    <input type="number" v-model="numberInput" />
+    <p> The below inputs are trimmed (after you change the input and unfocus it auto-trims)</p>
+    <input v-model.trim="trimmedInput" /> and
+    <input v-model.trim="trimmedInput" />
+    <hr />
+    <p>Value of custom input: {{customInput}} (can't just slap .lazy on custom inputs)</p>
+    <CustomInput v-model="customInput" />
+    <p>You can also use kebab case</p>
+    <custom-input v-model="customInput" />
   </div>
 </template>
 
@@ -180,5 +388,9 @@ export default {
   overflow-y: auto;
   margin: 2px;
   border: 2px solid #f70;
+}
+
+.ib {
+  display: inline-block;
 }
 </style>
