@@ -7,6 +7,9 @@ import MultiDivWithClasses from './MultiDivWithClasses.vue';
 import ConditionalDiv from './ConditionalDiv.vue';
 import RandomDiv from './RandomDiv.vue';
 import LifecycleBoxComposition from './LifecycleBoxComposition.vue';
+import WatchBoxComposition from './WatchBoxComposition.vue';
+import MultiDivSharedClass from './MultiDivSharedClass.vue';
+import DivSharedClass from './DivSharedClass.vue';
 
 const mutable = reactive({count: 0});
 const getMutable = () => {
@@ -218,6 +221,9 @@ const showLifecycleBox = ref(true);
     <LifecycleBoxComposition v-if="showLifecycleBox" :someprop="lifecycleBoxProp" />
     <button @click="updateProp">Update lifecycle box prop</button>
     <button @click="showLifecycleBox = !showLifecycleBox">Show/hide lifecycle box</button>
+    <WatchBoxComposition />
+    <MultiDivSharedClass />
+    <DivSharedClass />
   </div>
 </template>
 

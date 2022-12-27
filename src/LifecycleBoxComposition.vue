@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {defineProps, reactive, onBeforeMount, onBeforeUpdate, onUpdated, onMounted, onBeforeUnmount, onUnmounted} from 'vue';
+import {reactive, onBeforeMount, onBeforeUpdate, onUpdated, onMounted, onBeforeUnmount, onUnmounted} from 'vue';
 defineProps(['someprop']);
 const obj = reactive({
   mountedText: "before mounted",
